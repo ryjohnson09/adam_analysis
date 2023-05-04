@@ -1,0 +1,168 @@
+---
+title: "ADaM Analysis"
+format: html
+editor: visual
+---
+
+## Introduction to Clinical Trial Data
+
+```{mermaid}
+%%| fig-width: 5.5
+flowchart LR
+  A(Data Collection\nCRF) --> B(Organize Data\nSDTM )
+  B --> C(Analysis Data Creation\nADaM)
+  C --> D(Data Analyzed)
+```
+
+Clinical trials are conducted to assess the efficacy of various disease interventions. Before and during the study, data is collected pertaining to the study subjects (metadata) and the study outcomes using a **case report form (CRF)**. The [**Clinical Data Acquisition Standards Harmonization (CDASH) Model**](https://www.cdisc.org/standards/foundational/cdash) provides recommendations for designing CRFs.
+
+Once the data is collected, it is organized into tabular data in accordance to the [**Study Data Tabulation Model (SDTM)**](https://www.cdisc.org/standards/foundational/sdtm). SDTM datasets can then be used for the creation of "analysis-ready" [**ADaM (Analytical Data Model)**](https://www.cdisc.org/standards/foundational/adam) datasets. ADaM is one of the required standards for data submission to FDA (U.S.) and PMDA (Japan)[^1]. ADaM datasets typically have a theme that allows for focused analyses including (but not limited to):
+
+[^1]: Source: https://www.cdisc.org/standards/foundational/adam
+
+-   **ADSL:** Subject-Level Analysis
+
+-   **ADAE:** Adverse Events Analysis
+
+-   **ADVS:** Vital Signs Analysis
+
+-   **ADTEE:** Time to Event Analysis
+
+-   **ADCM:** Concomitant Medication Analysis
+
+-   **ADLB:** Laboratory Analysis
+
+::: callout-note
+The data standards and guidelines described above for CDASH, SDTM, and ADaM are set forth by the [**Clinical Data Interchange Consortium (CDISC)**](https://www.cdisc.org/).
+:::
+
+::: callout-important
+We will use a publicly available ADSL dataset from the [CDISC pilot study](https://github.com/cdisc-org/sdtm-adam-pilot-project/tree/master/updated-pilot-submission-package/900172/m5/datasets/cdiscpilot01/analysis/adam/datasets). This is **test** data and has been appropriately cleansed and de-identified for informational and research purposes.
+:::
+
+## Using a Validated Package Repository
+
+::: columns
+::: {.column width="70%"}
+For some data science teams, especially those working with clinical data and submitting results to regulatory agencies, the development environment must be carefully designed and tightly regulated to ensure reproducibility. This is often referred to as a **validated** **environment**. Within a validated environment, open-source packages are usually vetted to ensure they meet specific requirements before making them available to developers via a **validated package repository**.
+
+With Posit Package Manager, teams can easily create their own custom package repositories, including a validated repository for clinical data analyses. In this example, we will use a *validated* repository hosted on Posit's internal Posit Package Manager instance:
+:::
+
+::: {.column width="30%"}
+![](images/ppm_r_repos.png){fig-align="center" width="164"}
+:::
+:::
+
+To install an R package from a specific R repository on Posit Package Manager, we can modify the `repos` argument from within the `options()` function:
+
+``` r
+options(repos = c(REPO_NAME = "url-to-your-validated-R-repo"))
+```
+
+If you restart your R session, you'll need to re-enter the above code to set your R repository. To maintain this configuration across all R sessions, you can add this command to your `.Rprofile` R startup file. If you're using Posit Workbench, your administrator can set this configuration server-wide by adding this line to the `.Rprofile.site` file.
+
+## Read and Explore ADSL Data using R
+
+On the CDISC GitHub page, the ADSL data is stored as a `.xpt` file that is created using SAS. Fortunately, we can still read this data into R using the power of open-source data science! Here we'll use the [`haven`](https://haven.tidyverse.org/index.html) package from R to read in the `adsl.xpt` and save it to the variable `adsl`.
+
+```{r}
+#| message: false
+library(haven) # For reading SAS datasets
+library(dplyr) # For data manipulation
+
+# Read in the ADSL dataset
+adsl <- read_xpt(file = "adsl.xpt", NULL)
+
+# Take a glimpse of the data to see what it looks like
+glimpse(adsl)
+```
+
+Below I'll list some of the columns pertinent to this example workflow:
+
+-   **SUBJID**: Subject identifier for the study
+
+-   **AGE**: Age
+
+-   **BMIBL**: Baseline body mass index (BMI)
+
+-   **HEIGHTBL**: Baseline height
+
+-   **SEX**: Sex
+
+-   **TRT01A**: Treatment group (actual) for period 1. The three treatment groups are Placebo, Xanomeline Low Dose, and Xanomeline high Dose.
+
+## Explore the Data using Shiny
+
+While this data is not particularly large, it does contain numerous descriptive columns, and it can be a challenge to create static insights (i.e. plots, tables) to explore them all. For this reason, we will create an interactive web application using the the [`shiny`](https://shiny.rstudio.com/) R package, which will allow viewers to explore the data for themselves!
+
+The goal of this application is to explore the subject metadata and compare them between the various treatment arms. Below is the code for the shiny application:
+
+```{r}
+#| eval: false
+library(shiny)   # Web app development
+library(haven)   # Read in SAS dataset
+library(ggplot2) # Data visualization
+library(scales)  # Improve axis labels
+
+# Read in Data -------------------------------
+adsl <- read_xpt("adsl.xpt")
+
+# User Interface -----------------------------
+ui <- fluidPage(
+  sidebarLayout(
+    sidebarPanel(
+      # Drop down select input
+      selectInput("subject_data", "Subject Data", 
+                  choices = c("Age" = "AGE",
+                              "Baseline BMI" = "BMIBL",
+                              "Baseline Height" = "HEIGHTBL",
+                              "Baseline Weight" = "WEIGHTBL",
+                              "Years of Education" = "EDUCLVL"))),
+    
+    # Main panel (boxplot)
+    mainPanel(plotOutput("boxplot"))
+  )
+)
+
+# Server Function ---------------------------
+server <- function(input, output, session) {
+  
+  # Create Plot
+  output$boxplot <- renderPlot({
+    ggplot(data = adsl, aes(x = TRT01A, 
+                            y = .data[[input$subject_data]], 
+                            fill = TRT01A)) +
+      geom_boxplot() +
+      geom_jitter(width = 0.3, alpha = 0.4) +
+      theme_minimal() +
+      theme(legend.position = "none",
+            text = element_text(size = 15)) +
+      labs(
+        title = "ADSL Data",
+        subtitle = "Comparing Treatment Groups",
+        x = "",
+        y = attributes(adsl[[input$subject_data]])
+      ) +
+      scale_x_discrete(labels = label_wrap(10))
+  }, res = 100)
+}
+
+shinyApp(ui, server)
+```
+
+## Make your Project Reproducible using `renv`
+
+If someone else wanted to reproducible your work, there is certain information that would be helpful to include in your R project, including:
+
+-   Which R version was used?
+
+-   What packages were used?
+
+-   What package versions were used?
+
+-   Where were the packages installed from (repositories)?
+
+Enter [`renv`](https://rstudio.github.io/renv/index.html)! This is an open-source R package that can easily create a recording of our project's R and package dependencies. In order to leverage `renv`, you need to be within an [RStudio Project](https://support.posit.co/hc/en-us/articles/200526207-Using-RStudio-Projects). You can either [initialize a new project out of the gate by clicking the box "Use renv with this project."](https://docs.posit.co/ide/user/ide/guide/environments/r/renv.html#new-project-use-renv-with-this-project) Or, from within a current RStudio Project, you can run the `init()` function from within the `renv` package. This will create a [`renv.lock`](https://rstudio.github.io/renv/reference/lockfiles.html?q) file which will keep track of our project's R and package dependencies! This file can also be shared with others in order to reproduce the project's package environment.
+
+As your project's package environment changes (install/update/delete packages), you can update the `renv.lock` file by running the `snapshot()` function from within `renv`.

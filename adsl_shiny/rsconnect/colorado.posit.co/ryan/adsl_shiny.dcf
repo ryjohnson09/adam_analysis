@@ -1,0 +1,13 @@
+name: adsl_shiny
+title: adsl_shiny
+username: ryan
+account: ryan
+server: colorado.posit.co
+hostUrl: https://colorado.posit.co/rsc/__api__
+appId: 16089
+bundleId: 73339
+url: https://colorado.posit.co/rsc/content/0f83b903-25d1-4877-988d-cb477e8f2969/
+when: 1682711073.12496
+lastSyncTime: 1682711073.12497
+asMultiple: FALSE
+asStatic: FALSE

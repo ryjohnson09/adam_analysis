@@ -1,0 +1,22 @@
+---
+format: revealjs
+editor: visual
+---
+
+## 
+
+![](images/PST-Concept-Map.jpg){fig-align="center"}
+
+------------------------------------------------------------------------
+
+![](images/val-env.jpg){fig-align="center"}
+
+------------------------------------------------------------------------
+
+![](images/CDISC-standards.png){fig-align="center"}
+
+ 
+
+::: {style="text-align: center"}
+Clinical Data Interchange Standards Consortium \n https://www.cdisc.org/standards
+:::
