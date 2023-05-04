@@ -14,24 +14,26 @@ adsl <- read_xpt("adsl.xpt")
 ui <- page_fillable(
   theme = bs_theme(version = 5, bootswatch = "litera"),
   titlePanel("ADaM Subject-Level Analysis"),
-  layout_sidebar(
-    fill = TRUE,
-    fillable = TRUE,
-    sidebar = sidebar(
-      # Drop down select input
-      selectInput(
-        inputId = "subject_data",
-        label = "Subject Data",
-        choices = c(
-          "Age" = "AGE",
-          "Baseline BMI" = "BMIBL",
-          "Baseline Height" = "HEIGHTBL",
-          "Baseline Weight" = "WEIGHTBL",
-          "Years of Education" = "EDUCLVL"
+  card(
+    layout_sidebar(
+      fill = TRUE,
+      fillable = TRUE,
+      sidebar = sidebar(
+        # Drop down select input
+        selectInput(
+          inputId = "subject_data",
+          label = "Subject Data",
+          choices = c(
+            "Age" = "AGE",
+            "Baseline BMI" = "BMIBL",
+            "Baseline Height" = "HEIGHTBL",
+            "Baseline Weight" = "WEIGHTBL",
+            "Years of Education" = "EDUCLVL"
+          )
         )
-      )
-    ),
-    plotlyOutput("boxplot")
+      ),
+      plotlyOutput("boxplot")
+    )
   )
 )
 
