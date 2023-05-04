@@ -13,6 +13,8 @@ adsl <- read_xpt("adsl.xpt")
 ui <- page_fillable(
   titlePanel("ADaM Subject-Level Analysis"),
   layout_sidebar(
+    fill = TRUE,
+    fillable = TRUE,
     sidebar = sidebar(
       # Drop down select input
       selectInput(
