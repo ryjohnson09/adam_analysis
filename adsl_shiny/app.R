@@ -11,6 +11,7 @@ adsl <- read_xpt("adsl.xpt")
 
 # User Interface -----------------------------
 ui <- page_fillable(
+  theme = bs_theme(version = 5, bootswatch = "litera"),
   titlePanel("ADaM Subject-Level Analysis"),
   layout_sidebar(
     fill = TRUE,
