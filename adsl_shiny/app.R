@@ -5,6 +5,7 @@ library(scales)  # Improve axis labels
 
 # pak::pak("rstudio/bslib")
 library(bslib)   # The future of Shiny UI
+library(plotly)
 
 # Read in Data -------------------------------
 adsl <- read_xpt("adsl.xpt")
@@ -30,7 +31,7 @@ ui <- page_fillable(
         )
       )
     ),
-    plotOutput("boxplot")
+    plotlyOutput("boxplot")
   )
 )
 
@@ -38,8 +39,8 @@ ui <- page_fillable(
 server <- function(input, output, session) {
 
   # Create Plot
-  output$boxplot <- renderPlot({
-    ggplot(data = adsl, aes(x = TRT01A,
+  output$boxplot <- renderPlotly({
+    the_plot <- ggplot(data = adsl, aes(x = TRT01A,
                             y = .data[[input$subject_data]],
                             fill = TRT01A)) +
       geom_boxplot() +
@@ -54,7 +55,9 @@ server <- function(input, output, session) {
         y = attributes(adsl[[input$subject_data]])
       ) +
       scale_x_discrete(labels = label_wrap(10))
-  }, res = 100)
+
+    ggplotly(the_plot)
+  })
 }
 
 shinyApp(ui, server)
