@@ -3,33 +3,41 @@ library(haven)   # Read in SAS dataset
 library(ggplot2) # Data visualization
 library(scales)  # Improve axis labels
 
+# pak::pak("rstudio/bslib")
+library(bslib)   # The future of Shiny UI
+
 # Read in Data -------------------------------
 adsl <- read_xpt("adsl.xpt")
 
 # User Interface -----------------------------
-ui <- fluidPage(
-  sidebarLayout(
-    sidebarPanel(
+ui <- page_fillable(
+  titlePanel("ADaM Subject-Level Analysis"),
+  layout_sidebar(
+    sidebar = sidebar(
       # Drop down select input
-      selectInput("subject_data", "Subject Data", 
-                  choices = c("Age" = "AGE",
-                              "Baseline BMI" = "BMIBL",
-                              "Baseline Height" = "HEIGHTBL",
-                              "Baseline Weight" = "WEIGHTBL",
-                              "Years of Education" = "EDUCLVL"))),
-    
-    # Main panel (boxplot)
-    mainPanel(plotOutput("boxplot"))
+      selectInput(
+        inputId = "subject_data",
+        label = "Subject Data",
+        choices = c(
+          "Age" = "AGE",
+          "Baseline BMI" = "BMIBL",
+          "Baseline Height" = "HEIGHTBL",
+          "Baseline Weight" = "WEIGHTBL",
+          "Years of Education" = "EDUCLVL"
+        )
+      )
+    ),
+    plotOutput("boxplot")
   )
 )
 
 # Server Function ---------------------------
 server <- function(input, output, session) {
-  
+
   # Create Plot
   output$boxplot <- renderPlot({
-    ggplot(data = adsl, aes(x = TRT01A, 
-                            y = .data[[input$subject_data]], 
+    ggplot(data = adsl, aes(x = TRT01A,
+                            y = .data[[input$subject_data]],
                             fill = TRT01A)) +
       geom_boxplot() +
       geom_jitter(width = 0.3, alpha = 0.4) +
