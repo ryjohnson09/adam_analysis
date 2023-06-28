@@ -2,10 +2,8 @@ library(shiny)   # Web app development
 library(haven)   # Read in SAS dataset
 library(ggplot2) # Data visualization
 library(scales)  # Improve axis labels
-
-# pak::pak("rstudio/bslib")
 library(bslib)   # The future of Shiny UI
-library(plotly)
+library(plotly)  # For interactive plots
 
 # Read in Data -------------------------------
 adsl <- read_xpt("adsl.xpt")
@@ -46,7 +44,6 @@ server <- function(input, output, session) {
                             y = .data[[input$subject_data]],
                             fill = TRT01A)) +
       geom_boxplot() +
-      geom_jitter(width = 0.3, alpha = 0.4) +
       theme_minimal() +
       theme(legend.position = "none",
             text = element_text(size = 15)) +
@@ -54,10 +51,10 @@ server <- function(input, output, session) {
         title = "ADSL Data",
         subtitle = "Comparing Treatment Groups",
         x = "",
-        y = attributes(adsl[[input$subject_data]])
+        y = attributes(adsl[[input$subject_data]])$label
       ) +
       scale_x_discrete(labels = label_wrap(10))
-
+    
     ggplotly(the_plot)
   })
 }

@@ -20,3 +20,20 @@ editor: visual
 ::: {style="text-align: center"}
 Clinical Data Interchange Standards Consortium \n https://www.cdisc.org/standards
 :::
+
+------------------------------------------------------------------------
+
+ 
+
+::: {style="text-align: center"}
+ADaM Subject-Level Dataset (ADSL)
+:::
+
+![](images/adsl_data.png){fig-align="center"}
+
+-   254 Rows
+-   48 Columns
+
+------------------------------------------------------------------------
+
+![](images/adsl_shiny.png){fig-align="center"}
